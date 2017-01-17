@@ -1,0 +1,58 @@
+#!/bin/bash
+
+## Docker-ssh reattach script v 0.3
+##
+######################################################
+# In this new version is added an
+# interactive mode wich allows you to select
+# a container just by typing a number from
+# 1 to N depending on how many containers
+# are running.
+# It also works if you pass as first argument
+# a container ID. And if you don’t type
+# anything as first argument it will reattach
+# to the last launched container
+######################################################
+#
+# Ussage examples:
+# docker-ssh -> reattach to tha last docker running container
+# docker-ssh 2befdabcd -> reattach to container ID X
+# docker-ssh -i -> allows you to select between all running containers
+function interactive_mode() {
+	#DOCKER_PS=$(docker ps| awk {‘ print $1 “\t” $2 ‘}|grep -v “CONTAINER” |nl)
+	NUM_ARRAYS=$(docker ps |grep -v CONTAINER|wc -l)
+
+	for ((i=1;i<$NUM_ARRAYS+1;i++)); 
+
+	do 
+		NUM_ID=$(docker ps |grep -v "CONTAINER" | nl | sed "s/^\ *//" |grep "^$i"|awk {' print $1 '}) 
+		CONTAINER_ID=$(docker ps |grep -v "CONTAINER" | nl | sed "s/^\ *//" |grep "^$i" |awk {' print $2 '}) 
+		CONTAINER_NAME=$(docker ps |grep -v "CONTAINER" | nl | sed "s/^\ *//" | grep "^$i" |awk {' print $3 '}) 
+		INPUT="$NUM_ID $CONTAINER_ID $CONTAINER_NAME" 
+		ARRAY_NAME="CONTAINER_ARRAY${i}" 
+		eval "${ARRAY_NAME}=(${INPUT})" 
+	done 
+echo "————————————————————-" 
+docker ps |grep -v "CONTAINER" | nl | awk {' print $1 "\t" $2 "\t" $3 '}| sed "s/^/->\ /"
+echo "————————————————————-"
+echo -n "Type the number on wich container you want to reattach:"
+read number
+CID=CONTAINER_ARRAY${number}[1]
+docker exec -i -t ${!CID} bash
+
+}
+
+if [[ $1 == "-i" ]]; then
+interactive_mode
+exit
+fi
+
+# docker id might be given as a parameter
+DOCKER_ID=$1
+
+if [[ "$DOCKER_ID" == "" ]]; then
+# if no id given simply just connect to the first running instance
+DOCKER_ID=$(docker ps | grep -Eo "^[0-9a-z]{8,}\b"|tail -1)
+fi
+
+docker exec -i -t $DOCKER_ID bash
