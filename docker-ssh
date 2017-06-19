@@ -15,24 +15,24 @@
 ######################################################
 #
 # Ussage examples:
-# docker-ssh -> reattach to tha last docker running container
+# docker-ssh -> reattach to tha last docker running container XXX
 # docker-ssh 2befdabcd -> reattach to container ID X
 # docker-ssh -i -> allows you to select between all running containers
 function interactive_mode() {
 	#DOCKER_PS=$(docker ps| awk {‘ print $1 “\t” $2 ‘}|grep -v “CONTAINER” |nl)
 	NUM_ARRAYS=$(docker ps |grep -v CONTAINER|wc -l)
 
-	for ((i=1;i<$NUM_ARRAYS+1;i++)); 
+	for ((i=1;i<$NUM_ARRAYS+1;i++));
 
-	do 
-		NUM_ID=$(docker ps |grep -v "CONTAINER" | nl | sed "s/^\ *//" |grep "^$i"|awk {' print $1 '}) 
-		CONTAINER_ID=$(docker ps |grep -v "CONTAINER" | nl | sed "s/^\ *//" |grep "^$i" |awk {' print $2 '}) 
-		CONTAINER_NAME=$(docker ps |grep -v "CONTAINER" | nl | sed "s/^\ *//" | grep "^$i" |awk {' print $3 '}) 
-		INPUT="$NUM_ID $CONTAINER_ID $CONTAINER_NAME" 
-		ARRAY_NAME="CONTAINER_ARRAY${i}" 
-		eval "${ARRAY_NAME}=(${INPUT})" 
-	done 
-echo "————————————————————-" 
+	do
+		NUM_ID=$(docker ps |grep -v "CONTAINER" | nl | sed "s/^\ *//" |grep "^$i"|awk {' print $1 '})
+		CONTAINER_ID=$(docker ps |grep -v "CONTAINER" | nl | sed "s/^\ *//" |grep "^$i" |awk {' print $2 '})
+		CONTAINER_NAME=$(docker ps |grep -v "CONTAINER" | nl | sed "s/^\ *//" | grep "^$i" |awk {' print $3 '})
+		INPUT="$NUM_ID $CONTAINER_ID $CONTAINER_NAME"
+		ARRAY_NAME="CONTAINER_ARRAY${i}"
+		eval "${ARRAY_NAME}=(${INPUT})"
+	done
+echo "————————————————————-"
 docker ps |grep -v "CONTAINER" | nl | awk {' print $1 "\t" $2 "\t" $3 '}| sed "s/^/->\ /"
 echo "————————————————————-"
 echo -n "Type the number on wich container you want to reattach:"
